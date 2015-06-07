@@ -1,0 +1,1306 @@
+morning everybody, it's a little lame. good morning, everybody.
+
+that's a lot better.
+
+how's the build conf going so far? awesome, isn't it?
+
+this would be the best session you're gonna see all day.
+
+I want to welcome you all to build, welcome you all to a exciting new world development,
+
+I want to welcome the online viewers that are watching this in the live,
+
+and those gonna watch this in a recorded version of this.
+
+that's why we have such a orchistrator start to the session here.
+
+what I want to talk about is the azure's next generation compute platform.
+
+we've got a bunch of announcements to make this session, 
+
+and a bunch of really cool demos to show you in this session as well.
+
+this is the way that I structured the session, that kind of take you from the very top level,
+
+because we can't talk about compute without talking about azure's overall application model,
+
+which we called the azure resource manager. I'll talk about that.
+
+for those of you might not be familiar with it, it is sth. that is RDG-aided.
+
+but what I'll do from there is take you into some of the new APIs
+
+that are pluggined in to the resource manager that were announcing today, 
+
+and those around virtual machines, storage and networking resources,
+
+completely changing the way that you interact with these types of resources in azure. 
+
+and then I'll talk about service fabric, which we pre-announced last week.
+
+we've had a blog post, what you're gonna here is an SDK to play with the service fabric.
+
+for those of you didn't see the blog, maybe don't know what service fabric is.
+
+I'm gonna give you a pretty detailed overview of service fabric which are really excited about,
+
+which is a micro-service based orchistration platform.
+
+let's go ahead and start to talk about azure resource manager.
+
+just for curiosity, how many people have used azure resource manager?
+
+so just a few of you.
+
+those of you that have been using azure for some time that are probably using cloud services and the existing portal.
+
+well resouce manager is a different way of looking at cloud applications. 
+
+let me set some context to you, because if we take a look at the original cloud service application model, 
+
+you know that they were just focused on compute and network, 
+
+and left a lot of glue of connecting other types of pass services 
+
+including even just storage to those VMs that you've put into your cloud services. up to you.
+
+if you wanted a website, you deployed a website, and then you deployed a database, 
+
+and it was up to you to glue those together. 
+
+with azure resource manager, we've defined this cencept of resource grouping, 
+
+where you can group collections of resources together, that make up a whole application or part of a larger application.
+
+each resource instance that you put into resource group has a resource type, 
+
+I've already mentioned some resource types like virtual machines, like databases, like storage accounts. 
+
+and those resource types are defined by, what we called, resource providers. 
+
+the azure resource manager is completely extensible, 
+
+so it comes with a number of built-in resource providers that defined their own resource types, 
+
+but when we want to add a new resource provider to the azure platform ourselves, 
+
+there's no need to go change azure resource manager other than register the new resource provider in the types that it's gonna support. 
+
+where we've already on boarded, some third party resource providers as well. 
+
+you'll see us light up on board processes, so more and more you can on board your resource providers into this model. 
+
+one of the concepts here that we're sticking to is that resource groups are concept that's deeply baked in platform. 
+
+there's no such a thing as resource now in azure that is not a part of resource group. 
+
+so when you just want to create a storage account, if that's the only thing you interested in, 
+
+you'll still put it into the container which is a resource group.
+
+what you get by putting these thing in these containers is that you get a lifecycle management of the whole collection of resources that make up this logical entity you're interested in grouping together. 
+
+so you get the ability to deploy them all together. 
+
+and I'll show you how we support the declare of deployment of resource groups. 
+
+you get to update them together, so you've got updates that span a bunch of resource instances, 
+
+those updates can be done through single APIs into azure resource manager, 
+
+you can delete the whole resource group together, 
+
+so this is the way for you to say I'm done with all this application, this part of application. I'm deleting it.
+
+and all of the constituant resources get deleted automatically. 
+
+and then you can create the status of this resource group - the aggregated status of resource group.
+
+and you can drill into the resource group and create their status as well. 
+
+this grouping is useful in other places too. 
+
+for example, you're gonna see us add more and more capabilities around putting it in metering, on quotas on resource groups.
+
+so you could say, this resource group can only create a number of VMs and no more, 
+
+or only create XML storage and storage accounts and no more. you'll be able to set billing limits on resource groups. 
+
+you'll be able to (this is already there,) take a look at your resource group status from the collection perspective from the portals to the command lines, interfaces to azure, to the rest APIs as well as powershell.
+
+and then it's also scoped for RBAC. 
+
+so this is way we introduce RBAC to the control plans of azures to azure resource groups as a resource manager,
+
+where we can define our roles that are scoped to resource group or to resources or even some resources in a resource group. 
+
+so you could say only the owner of the resource group can have read/write access to the VMs in the resource groups for example.
+
+and then something you're gonna see is comming is identity is gonna be built into resource group too. 
+
+so resource groups will have their own identity provision in azure active directory, 
+
+and using this identity, all of the resources in that resource group will have the ability to talk to each other without you having to provide credentials or certificates, 
+
+then they have some identities to talk to outside services. 
+
+they will appear as first class principles in azure active directory. this would allow them to talk to each other.
+
+these resources inside the resource groups as well as the outside resources they're able to speak be aware of protocols to interact with these.
+
+one of the questions that I often get when I talk about what resource group is, 
+
+I've got some resources, when should I put these resources or put them in several resource groups. 
+
+the answer to that question is actually fairly simple and straightforward -
+
+do they have common lifecycle and management operations you wanna perform on them.
+
+if, for example, you've got a marketing database, and you got two frontends to that, 
+
+maybe one is an internal frontend that's going putting data in marketing database, 
+
+and the other one is a customer facing application. it's also makeing use of that marketing database. 
+
+well those are 3 different resources that likely have different lifecycles, so you want to put those each into seperate resource groups. 
+
+now the frontends, though, might have their own middle tiers. that part of them, that part of that lifecycle of that frontend, so you're gonne put those inside the same resource group.
+
+the resource group manager services. 
+
+so the resource group manager - there's a frontend to azure called the resource group manager, 
+
+and it provides a bunch of services that all of the resources that are part of this model get for free. 
+
+for example, centralized auditing of operations. 
+
+because it is control plan to azure, you get basically a log of all the control plan operations - I've got a screenshot there from the azure portal showing you that. 
+
+you get tagging of resources. so this is useful if you want to be able to tag resources.
+
+07:42
+they perform like cruise, like which resources are tagged marketing department, because these resources are related to whatever the marketing department is doing. 
+
+and you can, by tagging resources, do those kinds of queries. 
+
+this tagging will also be integrated into dealing systems, so that you can go and say how much does the marketing department cost me last month, 
+
+and by evaluating those tags and looking at the bills for the resources over the last month, you will see a summary of how much that cost you. 
+
+and finally, like I mentioned, it's a consistent place for RBAC with a number of built-in rules, 
+
+and then resources providers can define their own rules for themselves, for all their own resource types, 
+
+all implemented in consistent way through this control plan.
+
+one of the most exciting parts about resource manager, though for me, is the fact that it's got templatized deployments. 
+
+so you can interact with resource manager using rest APIs and perform imperative operations, and build up a resource group. 
+
+for example, you can say go create a VM, and then create a storage account, both are in the same resource group. 
+
+but we've moved into a world where imperative creation of resources of applications is sth. that is non-producible and fragile, 
+
+and so we've gone to, at least with azure, a more declarative approach to defining what applications look like. 
+
+and with the declarative approach comes the template that describes exactly what you want the application to look like, in this case, the resource group. 
+
+so for example, I want a website with a database, 
+
+and I want the database connection string to go into a input parameter on that website, instead of me having to do sth. out of band.
+
+by putting this in the template, I can describe those relationships and give it to azure resource manager. 
+
+I can parameterized the template, so that I can deploy it into multiple places and get the same experience everywhere I go just by supplying different parameters depending on the environment.
+
+so that I can deploy it to a test environment with test parameters. I can deploy to the prod environment with prod parameters. 
+
+I might want a single instance version of my application in test, 
+
+but in production, I want it to be multi-instances for scale out, for availability, 
+
+and I can do that just by changing parameters, but the template itself that describing the structure of the application is unchanged, 
+
+and I can check it in the resource control.
+
+the way that template execution works.
+
+azure resource manager takes a look. this is another advantage of having sth. that is declaritive rather than imperative is that 
+
+azure resource manager can examine the relationship between the resources and inner template, 
+
+and find the fastest path forward to get that operations executed. 
+
+so for example, I've got an app service plan which is what I deployed webapps, and logic apps onto.
+
+I might deploy a website onto it. I put auto-scaling on top of that. 
+
+after that completes, there's some resources that have dependencies on that website comming up, 
+
+like app insides, an alert rule on website, CPU usage, and maybe an MS deploy package, depending on the website comming up.
+
+before that, those can activate, and then that all completes. 
+
+you can see some of these deployment, some of these activations, we've got done in parallel, others ones were serial.
+
+you did not have to worry about that. simply by specifing the relationships, azure resource manager takes care that for you.
+
+so let's take a quick look at the built-in support for resource managers that is right in visual studio, enabling you get started with resource managers really easily. 
+
+and to do that, I'm gonna go to new a project here. 
+
+and in the cloud section, you can see there's this azure resource group here. I'm gonna left the default name. 
+
+and visual studio has some cant resource template base built-in to it. 
+
+I'll pick web app plus SQL because this shows us a multi-tier type application described as a resource group. 
+
+if I go over here to the azure resource group solution, I can click on the json describing that application. 
+
+and this is the template underneath a database plus a SQL server. 
+
+over here we see a json outline which is convenient. convenient outline means to look at the resource types that inside this template. 
+
+there's a number of them, in addition to the ones seem obvious like website and database. 
+
+we've got a SQL server, and we've got a database. you can see if I click, it's navigating to json, you can see here is a resource. 
+
+and there's some interesting things to know here. 
+
+for example the type, this's a database type. it's actually a subset of the microsoft SQL namespace. 
+
+it's gonna deploy at a specific location. 
+
+so I could have a resource group that span multiple locations, meaning multile azure regions. 
+
+so I can say, this thing goes to east US, and there's the other database, part of the same template that goes to west US.
+
+that would allow me to create, in same template, DR, or highly avaible applications that spans regions in azure.
+
+and then you can see properties down here. with references to what we called parameters. 
+
+well, let's take a look at what parameters are. 
+
+like I mentioned, you parameterized your resource group, and this allows you to customize it. customize this template for whatever environment you're going to. 
+
+you saw some references here like, for example, the size of the worker. 
+
+in the website, how big can the worker role be, or the work role will be rather?
+
+you see the allowedValues are 0, 1 & 2. it's a type string, with the defaultValue be 0. 
+
+so if no parameters are specified here, here's the default here. 
+
+but it also any tooling can look at this and knows that it's going to enforce that I don't put a 3 in there.
+
+now what I'm gonna do here is to show you how visual studio helps you to deploy this thing. 
+
+so I've created a provision of my azure subscription here.
+
+and when I go to deploy it, one of the things that it's going to ask me is the new resource group name.
+
+but I can also edit the parameters right here inside the visual studio.
+
+so this is a look in template, say, hey, you need to provide some of these values.
+
+you can see the workerSize here which is default to 0, as specified in that parameter section of the template.
+
+so let's switch back to the powerpoint, and get a little more detail about what we were doing in those templates. 
+
+so quickly, just review some of the things you saw. 
+
+parameters, those are the templatized parameters that allow us to specify some values from outside the configuration file. 
+
+there's variables, which are basically macros of values that I can then use in multiple places inside the template instead of having to put the same expression all over the place. 
+
+there'is resources we've mentioned, and there's output values.
+
+so templates can produce output values and then can be looked at through tooling, or through UIs, 
+
+they will tell us what are the interesting things that came up.
+
+for example, when I go to deploy a website, what's the url of the website that popped out of that resource group template as I deployed it. 
+
+that can be a output parameter, and emit by the website itself into that resource group, 
+
+and then I can go take a look inside a portal. for example, to see what url to hit to see that website.
+
+and then, there's some DSL that you'll see here. 
+
+in templates, it allows us to create expressions. 
+
+for example, one of these is this parameter expression which reference is parameter. 
+
+you can see this reference from the second one up there, that lets us reference an output value from one resource into another one. 
+
+so that connection string, that SQL connection string I mentioned, 
+
+I wanna refenrece from the website configuration for SQL connection string, 
+
+the output of this SQL database, which is gonna be its connection string. and that I'll do with the reference value.
+
+so that's a quick overview of azure resource manager.
+
+let's talk about some of the announcements we were making here build today which is really exciting. 
+
+it's around the new support for virtual machines, storage and networking APIs as part of this resource manager family. 
+
+up to today, we have a number of resources already plugged in azure resource manager. 
+
+you saw websites; you saw azure database example I just show you; redis cache is another one.
+
+there's 40 more microsoft first party, like I mentioned, some third party.
+
+like SendGrid, for example, is a thrid party resource provider, 
+
+so you can provision a SendGrid endpoint as part of a template,
+
+and that would then allow you website to be able to send email without you having to go preprovision that yourself. 
+
+there's also version 1 of network storage and networking APIs built in azure resource manager today. 
+
+let's talk about what's new about version 2.
+
+so version 1, if you create in a portal which, I'll show you in a minute, a resource group.
+
+you'll see virtual machine of v1 type will be going to resource group. 
+
+but it's not a first class citizen of azure resource manager,
+
+so it has no RBAC support, it has no tagging support, it has no templates. 
+
+it's really kind of visualization, a kind of weak link of that resource into the resource group. 
+
+and it's got clunky network modeling. if you're familiar with our networking APIs, 
+
+maybe you wanna have a nic???, for example, that were seperate from the virtual machine or load balancer, that were seperate from a scale out set of virtual machines. 
+
+you didn't have that option. those were baked in the compute model. 
+
+so what we've got with version 2 is drag the integration into resource manager.
+
+so all of the things I've been talking about with the azure resource manager just light up. 
+
+you've got a revamped control plane now that we put in here, underforth to implement these resource types 
+
+which overcomes some of the serialization limitations of version 1 implementation. 
+
+so if you've ever done multiple operations, maybe had a lock you couldn't update you clouds service, 
+
+because sth. was in progress, you wanted to add a disk to virtual machine. 
+
+those were all gone. everything is fully asynchronous. 
+
+so you can go be modifying the virtual machines while you modifying the network adaptions for them, 
+
+while you are modifying the virtual disks for them at the same time, 
+
+all of that is then just async operations you get through the control plan. 
+
+and then really excited to say, that these new APIs are part of the azure consistency private cloud experience. 
+
+they were delivering, and we committed to deliver. I'll talk more about it in a second.
+
+like right now. - -||
+
+let's take a look into this new APIs. so we'll switch to the demo machine. 
+
+now what I've got is a template here. this is a coffee shop application. I got the template here in visual studio. 
+
+If I click it, you can see a bunch of resources in here, 
+
+we see a SQL server, we see a website just like what we saw before; 
+
+here we see version 2 of these virtual machines; we see the nics as well. 
+
+if I click on the virtual machine, we can see that these're fully parameterized 
+
+so I can see I parameterized the size of the virtual machine right here; 
+
+I parameterized things like the admin user account and password. 
+
+so these're gonna be asked for the time I deploy the template. 
+
+I've even specified where the disks were going, what the storage account, and I parameterized the way. 
+
+and there's a variable here, a macro basically the sourceWinImageId. 
+
+if I go to sourceWinImageId variable, you can see this is a concatination of some subscription information,
+
+and then, there's a parameter here vmWinSourceImageName. 
+
+so it's gonna actually ask me when I deploy this thing what the vmWinSourceImageName is. 
+
+but there's the default, you can see that is a linux virtual machine.. oh sorry I clicked on the wrong one. 
+
+here, you can see this is a windows virtual machine. this is windows server 2012-02.
+
+so there's a default here specified I can overrule and specify other images.
+
+19:57
+now I'm gonna deploy this in powershell. and here is the powershell command lite??? to deploy an azure resource group.
+
+you can see, I renamed this one - markscoffee24. 
+ 
+I'm specifying East US. here's the json file. 
+
+and then I'm specifying, as part of this deployment, a parameters file. 
+
+so let's go to take a look at this parameters file, which is right here, 
+
+and I simply filled in these values that is required. 
+
+like I mentioned, the username of admin and password. 
+
+you can see there's no password here because I didn't want to share with you what the password really is. 
+
+but if I pass a file now, this is... opps, I gotta switched to azure resource manager mode here and I press F5.
+
+and now this's gonna be launching to east US. 
+
+I'm not gonna wait for that to finish, I've already deployed one of these resource groups of that template here, markscoffee.
+
+you can see markscoffee24 has been deployed. 
+
+I'm gonna click markscoffee. and let's take a look at resources, that part of it, that matches the template. 
+
+so I click on resources, here's the list of resources.
+
+exactly like what we saw on the template, like exactly what we saw on visual studio. 
+
+down here you can there's a storage account, so this is the version 2 of storage control plan APIs. 
+
+here's the blob, and there's one blob in that account. 
+
+and that is storing a vhd here, which you saw the full parameterization of vhd as provided in that template. 
+
+when I go back and take a look at the webapp, 
+
+right in here, I've got a browser experience just to show you that this thing really is live.
+
+there's the coffee shop app, that was deployed as part of that template.
+
+so that's fantastic. I deployed to the azure public cloud. 
+
+but this coffee shop business that I'm getting into coming from Seattle. 
+
+I've known a things or two about coffee, and I think there's space for a little neighborhood type coffee shop, 
+
+maybe not near San Francisco, but maybe some place else. 
+
+and what I wanna do is to deploy the same coffee shop app to a location where I've got my little coffee shops sprouting up., maybe azure is not reaching yet. 
+
+I wanna deploy it to a private cloud. 
+
+I wanna take that same template and deploy it in the private cloud. so let's go and see how we can do that.
+
+I've got that same template here, coffeeshop json. I'm deploying it.
+
+here, I've got azure setting environment. this is against azure resource manager. 
+
+I've added my own coffee shop private cloud endpoint. I've got a subscription at that endpoint buildDemo. 
+
+and when I launch this thing, it's gonna ask me the resource name, coffeeshop...let's make it some random number... 
+
+and now it's gonna start deploying to markscloud as part of this endpoint for marks private cloud. 
+
+again, we're not gonna wait for that to finish, let me go and take a look at... opps, it's Spartan, still getting used to that ui style. 
+
+this browser is pointing at mark's private cloud where I just started that deployment. 
+
+when I go to browse all, here's the resource groups. 
+
+there's markscoffeeshop30 processing the deploying. let's quickly click on the one that is already deployed - markscoffee.
+
+and this is gonna look very much like what we saw in the public interface.
+
+of the same template, the same resources, the same APIs, I can go and click on the storage account, 
+
+and take a look at the blob, and here's the blob not in public azure, sitting in the blob storage account of my private cloud.
+
+if I go back to the website, I get exactly the same portal experience.
+
+I clicked open, and I've opened mark's coffee shop running on mark's private cloud. 
+
+same template, parameterized differing private cloud deployment. 
+
+so let's switch back to the powerpoint.
+
+now what I've shown you is the introduction of virtual machines into this new azure resource API.	 
+
+what I'm gonna do for the rest of the session, is take you a layer up the stack 
+
+to show you some capabilities that were enabling as we built this into the system. 
+
+I've shown you the azure consistent private cloud, I've shown you azure public cloud. 
+
+in fact, I can take the virtual machine and deploy to either one of them. 
+
+you'll see in here this label though, it says the virtual machine and the virtual machine scale set. 
+
+so let's talk about whatever virtual machine scale set is.
+
+this is a forward announce of a preview. it's gonna be comming in few months of VM scale sets. 
+
+so those of you have used worker roles and web roles. 
+
+how many of you have used work roles or web roles in azure? so a lot of you have. 
+
+and you've probably run into some of the limitations of web and worker roles. 
+
+powerful as they are for stateless and scale out applications, for easier elaticity and reproduciblity, because they're all just gold images,
+
+the limitations include the fact that you can't pick a custom image. 
+
+there's no support in linux, for example, in web and worker role. 
+
+so what the virtual machine scale set introduces is basically the next-gen worker role. 
+
+you don't need to put your own runtime in there, it's basically exactly the virtual machine except it's stateless, 
+
+and you can scale it out very easily. 
+
+you can start with a golden image.
+
+it supports golden image based updates of the OS. so you get reproducibility and consistency of the experience.
+
+and it's great for clusters. 
+
+so speaking of clusters, here's just a little graphic to show you these things are scaling out. 
+
+but speaking of clusters, let's talk about virtual machine extensions, 
+
+and how this enables third party cluster orchistrators to layer on top of azure.
+
+with virtual machine extensions, you've got the ability to dynamically inject code and configuration into virtual machines.
+
+either at the time that virtual machine provision or even afterwards. you can even update the code configuration. 
+
+we previewed this basically about a year ago, and this is a part of new virtual machine APIs as well. 
+
+you can stick things in like shuffling, pumping, and DSC.
+
+you can stick in things like monitor agents, backup agents, 
+
+we just announced a backup service for azure virtual machine which make use of the backup, extensions to inject backup agaent. 
+
+you can stick security agents in there and do a lock encryption, and do WAF.
+
+basically, it's left the imagination for what kind of code you wanna layer.
+
+the benefit of extensions, is that you don't have to bake this stuff in an image.
+
+you can take any stark image. it's compatible with these extensions, and layer them on after the fact. 
+
+so no more having to go than have image sproll???, just because you want to monitor an agent inside of your images. 
+
+now what does it enables is for third party orchistrator in PaaS application frameworks to put their own, 
+
+to bootstrap themselves into these virtual machines using virtual machine extensions. 
+
+again they don't have to bake all their stuff in the virtual machine, 
+
+they can take advantage of the extension model to get themselves bootstrapped, 
+
+and they also then get the benefit of anything else that works in extension, works side by side by with them like anti-virus. 
+
+you can see here, scrolling up, there's support for SCALR, RightScale, Mesos, Swarm clusters, 
+
+and then those can bring in their PaaS layers on top, 
+
+because those are cluster orchestration system that PaaS application framework layer on top of like Apprenda, CloudFoundry, Jelastic, Marathon, or some examples.
+
+now what I wanna show, and announce here, is through a great partnership with Mesosphere.
+
+if you are familiar with Mesosphere and it support for Mesos clustering. 
+
+they have a new cluster orchestration platform called DCOS. 
+
+DCOS has been a private preview. today they were announcing a public preview. 
+
+and the first place of public previewing is with on azure built-in the templates. 
+
+and what I got right here, is showing you github, with a mesosphere template here. 
+
+Corey here, there's Corey Sanders. he's just modifying this an hour ago. he is a program manager on the virtual machine team. 
+
+what we see here, is that the template for a mesosphere cluster. 
+
+so this is a highly available mesos for a cluster. you can deploy with this thing. 
+
+if I scroll down, the interesting part here is how do we make this thing a high scale cluster. 
+
+here's a type Microsoft/virtualMachines. 
+
+you can see that it takes a name as the parameter, takes location as a parameter. 
+
+but then it's got this interesting thing, which is a new edition to azure resource manager, 
+
+which is the ability basically to create loops over resource instantiation. 
+
+so this the masterVmLoop for the master node in that mesosphere cluster. 
+
+and the count is parameterized, so I can say that I want 10/3 mesosphere masters.
+
+I can say I want one, because I'm just doing that test, and I don't want a big deployment. 
+
+and you can see some dependencies on some other resources. 
+
+down on osProfile, you can see an example of some of these instantiation support we've added. 
+
+which is customData that get piped into virtual machine through a cloud net type interface, so that this gets bootstrapped. 
+
+the mesosphere master gets bootstrapped on a base os image. 
+
+so again, so that the mesosphere doesn't have to continue to maintain an os images with mesosphere baked in. 
+
+you can dynamically pick a mesosphere base image, and then deploy the cluster into that image.
+
+so let's go take a look at that mesosphere cluster. 
+
+I'm gonna go back to that and rebuild in the deployment experience right from github for all of the templates, 
+
+and you'll see that we've created probably a hundred templates now, that're up in github. 
+
+they all have this deploy to azure button. 
+
+so once you setup your azure subscription information, you get this kind of experience, which will open a template up. 
+
+if I'm happy with this template, I say save. 
+
+and I go back to add parameters. and you see here the parameters I need to enter. 
+
+some of them like the NUMBEROFSALVES, the NUMBEROFMASTERS, and we're gonna deploy a cluster of a hundred salves. 
+
+and down here, we need to type in some ssh data. 
+
+actually, I'm gonna just go and skip that, because I've already got this cluster like this already deployed. 
+
+I'd specify these other two parameters, and press ok.
+
+and this would start a deployment of a hundred VM mesosphere cluster to azure.
+
+let's go and take a look by going to the azure portal at the pre-deployed one that I've got. 
+
+and we're gonna deploy this little play-around mesosphere cluster to show you how cool it is to have a container cluster orchestrator on top of azure machines. 
+
+so I've got here this one DCOS, and you can see it's got 250 resources.
+
+these're all the resources including nics, virtual machines, the masters and the salves, that are part of this deployment.
+
+now I want to interact with this cluster, so I deployed it.
+
+but now I need to interact with the management interface to that, 
+
+and I can go and find out where the management interface is by looking at the deployment history for this thing, which has the template output parameters. 
+
+you can see there's string masters that each spit out their urls. 
+
+now I don't know which one is the true master of this cluster, because one of these three is the master.
+
+there're three for fail out purposes. 
+
+now there's a 50-50 chance I pick the right one, actually that doesn't make any sense, does it? 
+
+there's an 1/3 chance I pick the right one, but it's port 5050, the thing listening on it.
+
+you can see I picked the wrong one, and now it's redirected me to the mesosphere master. 
+
+and now I'm looking at the mesos cluster management interface. 
+
+what DCOS brings a table is a higher level management interface on top of the mesos clusters. 
+
+and I can get to that by simply hitting the url.
+
+and now I'm looking at the DCOS dashboard which shows me the overall cluster utilization. 
+
+I can see all the nodes that are part in that cluster, and there specific utilizations.
+
+what I wanna do is take a look at the custom viewer as a deploy of a bunch of container to this. 
+
+so we created a DCOS visualizer, working with the mesosphere team, which will show us the container starting up. 
+
+and when I come back here, what I wanna do is add the Marathon application framework to that cluster, 
+
+and this is already pointing at that cluster that I just got deployed. 
+
+and I'm gonna add Spark which is another application model. 
+
+and now I'm going to launch 1000 Marathon instances, and I'm gonna launch 1000 S		park instances. 
+
+so these are all going to docker containers on top of those virtual machines on top of azure. 
+
+and this little visualizer shows you how quickly these tasks, these application containers get deployed and launched onto that mesosphere cluster.
+
+yeah, you can clap. :D I think that was the mesosphere guys clapping.
+
+so let's switch back to the presentation.
+
+so that's a look at the cluster orchestrator on top of that foundation of virtual machines, virtual machine extensions on top of azure resource manager with templates. 
+
+now I wanna take you into, I've already, btw, talked a little about containers this morning at keynote. 
+
+how many of you saw that? I see everybody did. 
+
+33:30
+Sony??? shows windows containers and linux containers with integrated docker support. there's a full container session.
+
+then we'll go to windows server containers tomorrow late afternoon. so I'm not gonna spend time here. 
+
+but one of the great thing of containers is that they're great for micro-service based applications. 
+
+let me just stop here for a second and talk about what is a micro-service based application.
+
+a micro-service based application is one application decomposed into tiny parts. 
+
+and you decompose it into tiny parts for a few reasons. 
+
+one is that you can test them in isolation, they can run in isolation. 
+
+when they are put into containers, you can make sure when it works on a deck??? box, it works production box as well. 
+
+now by decomposing into these fine grain units, 
+
+you wanna create kind of rigorous interfaces between one of the microservices and the other microservices in the application.
+
+that also helps you evolve those different parts of application independently. 
+
+with strong contracts, as long as you don't break the contract, you can change the implementation underneath the hood, 
+
+and even add new functionality without breaking the other microservice that is depending on it, 
+
+and then have this kind of organic growth of the application in a very light way and decentralized manner.
+
+you could also update them independently.
+
+so if you can make a change to a microservice, you are not impacting the whole application. 
+
+you can scale it out independently. 
+
+so instead of having to take giant blocks with a whole bunch of stuff inside of it, you just wanna scale out, 
+
+because you just hit a limit on one of the application in that big bottle neck of block.
+
+you wanna scale out just the microservice that needs to be scale out, that needs more cpu or more network, and leave everything else alone. 
+
+so it has a lot of efficiencies for agile development, for rapid iteration, for ease of management. 
+
+now going and managing these microservices is sth. that you probabaly don't wanna do yourself.
+
+you want a micro-service manager to do it for you. 
+
+and it would even be nice if you had an application platform that understood microservices 
+
+and made it easy for you to write microservice based applications. 
+
+and that's where service fabric comes into play. 
+
+it's built on top of that same foundation which we saw the mesosphere and DCOS clusters, 
+
+and these other clusters orchestrator and PaaS libraries on top of. 
+
+this is sth we've been working on inside microsoft for a long time. 
+
+35:50
+and it has a rich shed??? of functionality designed on microservice based application. 
+
+everything from making sure of its highly avaiable, it's templatized, just like azure resource manager, 
+
+you describe a template of your mircoservice based application, 
+
+and that allows serivce fabric to look at what you want, and make sure that you're getting what you want. 
+
+if you want 3 replicas of your frontend microservice, and a virtual machine goes down.
+
+it's service fabric that is gonna make sure of it's gonna migrate and create a third one.
+
+they got impacted for you without you having to go and worry about that.
+
+it supports partitioning for scale out, I'll talk about it in a minute. 
+
+it supports rolling upgrades of microservices.
+
+so if you got those 3 frontends, you don't wanna just blast and update total 3 of them.
+
+you wanna do it in a careful way that provides avaiblity and safety by doing one at a time and one at a time. 
+
+and if there's a problem, with health watch dog built in the service fabric once you add yourself. you can get roll back on top of it. 
+
+it supports private clouds as well as public clouds. 
+
+you can deploy it on your own system. you can deploy to azure. 
+
+here's just a subset of some of the high level functionalities and capabilities of service fabric. 
+
+I've touched some of them. I talked about rolling updates with rollbacks. 
+
+it supports strong versioning. so it knows rollback means.
+
+so it knows you've got version 2 microservices, and version 1 is the last known good one.
+
+it supports side-by-side support. so I can actually deploy version 2 microservice on the same cluster with version 1.
+
+and service fabric will route the request appropriately depending on what the client wants to talk, version 2 or version 1. 
+
+it supports leadership election. and this is inherent in sth. called stateful service, stateful microservice support, which I'll talk about in a second. 
+
+of course, name discovery, that's any cluster orchestrator with containers needs name discovery service that different applications can find each other. 
+
+I mentioned (it supports) partitioning support. 
+
+it supports load balancing and placement constraints. 
+
+now this is important if you got a cluster and you deployed multiple applications to it or a complex application with many many microservice, 
+
+you might say that the frontend can't be on the same service with the middle tier or some other component, 
+
+because they conflict on resource requirements, or they conflict in some other way. 
+
+so what you'll do is set a placement contraint and say these microservices can't be co-located with the other ones. 
+
+you can even do these things like these two need to be there. 
+
+because they actually have a tight interface,
+
+and I want round-trip communication between them to be as fast as possible on a local machine where it can be. 
+
+and like I mentioned, this isn't only kind of microserivce platform out there that supports stateful microservices. 
+
+I'll talk about what stateful microservice means in a second.
+
+but this, what we're making available is already, like I said, being used for 5 years since now inside microsoft to power all of these services, 
+
+for everything from azure database, which is now running 1.4 million customer databases. 
+
+let me just highlight what it means, from serivce fabric perspective, 
+
+that means tens of thousands of servers, hundreds of thousands containers of microservice, essentially microservices. 
+
+each of those databases is represented as an instance of a stateful microservice with either 3 or 4 replicas, 
+
+where service fabric is taking care of all the state management and all of the healing and all of the updating of those database instances. 
+
+so 1.4 times roughly 3 backaging id of the number of stateful replica instances that service fabric right now, as we speak, is keeping healthy in the azure cloud.
+
+down to things like Intune and Cortana. 
+
+so Cortana is supporting billions of requests for a second. 
+
+for people who are working on Cortana, all of that is going through service fabric. 
+
+and this is what we're giving out is the SDK here today to you, 
+
+which the url should be live above now, which I'll show you at the end of slides. 
+
+we're not giving you sth. that looks like what we run internally for this stuff. 
+
+we're not giving you sth. that's a rewrite out of it. 
+
+we're giving you the exact same bits. 
+
+this SDK that you're getting is the same SDK that all of these services is used. 
+
+so that's what made me so excited.
+
+let me just give you an idea of some of the things that can do visually. 
+
+so I've got 2 applications consisting multiple microservices, 
+
+I deployed it with placement contrains and load balancing, it's going out to a cluster of machines.
+
+now if a machine fails, service fabric will automatically heal those instances to other servers.
+
+what is a microservice in the world of service fabric. 
+
+it's really whatever you want it to be.
+
+it can be an ASP.net 5 application; it can be a nodejs application; in fact it can just be an arbitrary .exe, and say this is my microservice.
+
+and take it from here. anything you want it to be. 
+
+and as I mentioned several times now, there's two types of microservice fabric supports. 
+
+there's a stateless microservices, and there's a stateful microservices. 
+
+the stateless ones are the ones that you are probably most familiar with. 
+
+like the whole application on azure has been pushing towards a stateless one, stateless worker roles, web roles. and asp .net web apps. 
+
+those're all externalized state to some place else. 
+
+and there's a need for stateless microservices at any complex applications, 
+
+azure database consistes of probably dozens of services, and several of them are stateless microservices like frontends.
+
+then there's stateful microservices. let's talk about what statefulness means. 
+
+it means that the code in the computer are co-located together, it's not externalized. they are bound to be tied together.
+
+and the only through this kind of microservice stateful system can you ensure high availability and endurablity of that state. 
+
+and service fabric takes care of that state management for the developer. 
+
+that azure database, the azure database developers, they worry about writing SQL .exe, and underneath SQL .exe they talk to service fabric APIs.
+
+when SQL .exe wants to make a transaction, they call service fabric APIs. 
+
+and service fabric APIs then taking care of, making sure of the primary in that leadership election, 
+
+one of these 3 database replicas is the primary, that state change that transaction is the replicated to the secondaries.
+
+the developer doesn't worry about it, doesn't even worry about the fact that it's on a primary or a secondary, or the secondary is tracked by service fabric.
+
+and if there's a failure, anywhere on the way, if there's an update progress on one of the databases, so it's down,
+
+service fabric takes care of creating new a instance of database on a healthy server, and catching that instance up with the primary and the other surviving the secondary. 
+
+or if it's the primary die, service fabric picks a new primary, and the name service automatically routes new requests to the new primary, 
+
+providing a stateful consistent view of data, very easy for the SQL developers to work on.
+
+there're two different types of APIs. 
+
+there're multiple programs you can put on top of a service fabric. I'm gonna talk about two of the what we're realeasing with this SDK. 
+
+one is called the Reliable Services API. and the other one is called the Reliable Actor API.
+
+let's talk about the reliable service api. 
+
+those of you that are familiar with .net...
+
+how many .net programmers are here? raise your hand.
+
+so how many of you have ever used a dictionary or a collection? so almost everybody has. 
+
+what we're releasing here are support for reliable collections and reliable dictionaries, basically reliable services. 
+
+using the same data structures that you are familiar with, 
+
+except underneath the hood, service fabric taking care of making them highly avaiable and endurable using these microservices underneath. 
+
+so ReliableQueues, ReliableDictionaries.
+
+and let's go take a look at a demo, which you can get right from visual studio of launching one of these sample applications. 
+
+if I go under visual studio now, when you get in the sdk installed, you saw service fabric here.
+
+and I can say application with stateless service, stateful service, stateless actor service, and stateful actor service.
+
+I'm gonna click on stateful service and press ok. 
+
+and then we go and take a look.
+
+this is how one basically microservice is part of it. here's the application manifest. 
+
+so remember I said everything is declared of. you can see that this has one stateful service, it's called Stateful1. 
+
+it is of type stateful, and its partition, I'll talk about partition in a second. 
+
+we can go take a look at the code for this stateful service. and this code is right here. 
+
+so this is getting a reference to a ReliableDictionary, which is just a key-value store. here sticking into myDictionary.
+
+and then what is doing is getting the current value for the key Counter-1, and then it's spitting out that value right here. 
+
+so this would go to the service fabric diagnostic logs that we can see in a second. 
+
+and then it's adding one here, and it's commiting the transaction. 
+
+so transactions are essentially transparent tier. 
+
+you can perform multiple operations on multiple objects - all underneath this kind of transaction. this creates transaction.	
+
+45:18
+and then it's all-in??? committed, it committed. 
+
+so I can update this object, this object, do that one, minus this. say commit, and either the whole thing happens or none of them happened. 
+
+and these failure cases are all handled automatically for you underneath the hood. 
+
+the states are all replicated, they're replicas. and the transactionly consistency matter. 
+
+that's how easy it is to write a sateful transactionly consistent application with this API.
+
+now let's go ahead and deploy this thing. so I'm gonna deploy by, saying, publish.
+
+well I uncheck it say deploy. actually, I'm already doing deploy.
+
+so I've got a test cluster set up for this one, and a development cluster. 
+
+and what I'm gonna to do is F5 in visual studio. 
+
+what this is gonna do is spit out those logs, those service fabric diagnostic logs right here in the visual studio, the diagnostic events. 
+
+so we're gonna first see those microservices, that microservice in those instances cuz there's gonna be 3 instances deployed, come up. 
+
+and then we're gonna start to see counters here, says Counter 1, Counter 2, Counter 3. 
+
+that's the incrementing of that ReliableDictionary key-value. 
+
+and I can go back here in the visual studio in the service. 
+
+and I can get debugging of that stateful microserivice right inside visual studio. 
+
+so I've just hit this, you can see I've got all my locals. I can step through it. so this is distributed microservice debugging right here inside visual studio.
+
+so let's go back to the powerpoint. let me talk about a little more about some of the scalabilities. 
+
+I'll show you some demos a little bit more impressive than running sth. inside the visual studio. 
+
+let's hope that you find them.
+
+microservice partitioning. 
+
+we know that we're gonna scale out our world. 
+
+we're dealing with datasets that are so large that we need to scale out we can't scale out. 
+
+so partioning is one way that helps us do this, having client requesting routed to a partition of a microservice. 
+
+so I can partition my microservice namespace. 
+
+and as requests comming into a new partition, the microservice instance are automatically fired up by service fabric. 
+
+48:00
+so you can see here that I've got one partition here with its primary, and its secondaries are another partition serving the same service, ??? as well. 
+
+and this get distributed just like any other microservices. 
+
+let's go take a look at some of these in action on a larger scale out application. 
+
+how many people noticed, just for curiosity, that Scott Guthrie, always wear red shirt. 
+
+anybody noticed that? so it turns out a lot of people have noticed that. 
+
+48:27
+a lot people have a lot of debating discussion about which would Scott's red shirts be the best over the various veracity???.
+
+so we created an application. it's gonna let people vote on which Scott Guthrie red shirt they like the best. 
+
+and this is the composition. it's working on a microservice. 
+
+it's a web viewer of microservice, a national service, county microservice which counts up all the votes from all over the counties in the country. 
+
+those county services are just keeping track of the votes on their own county. 
+
+and then we've got voting services which are generating the votes, so this is kind of low generator of the application.
+
+so let's switch to taking a look at this application. 
+
+what I'm gonna do is open the website here, and you can see that I don't have anything running. 
+
+then what I'm gonna do is launch this, and this is the deploy election from the package.
+
+so I deployed this Scott Guthrie application, btw, this is Scott Guthrie application. 
+
+I'm gonna deploy this and come back and show you what's going on. 
+
+this is refreshing here. this would come up in a second as that application of, 
+
+this is being deployed, btw, to a microservices to 100 A2 VMs up in azure; 
+
+10 D4s for the initial counties; 40 D4s for the count scale out which we're gonna do in a minute; 
+
+5 D4s that are doing on the national service level; and 5 D4s that're doing the web interface. 
+
+so this is a massively scaled out application running on azure. 
+
+it's gonna be deploying microserivices to this cluster, so represent this application here in a second, and you're gonna see this fireup. 
+
+and the votes start to come in. we do a little refresh here. 
+
+and there we see Build2013, Build2014 and votes are comming in and the counties are starting to light up their preferences.
+
+so they are collecting up the color from the majority votes in those counties.
+
+and if I go take a look at the codes of this. this is the VotesController.
+
+actually let me go to the NationalElectionService. here..oh yeah, here I am.. 
+
+and this is actually going to down here, getting the ReliableDictionary. this is the county VoteCount. 
+
+if I click on this ReliableDictionary CountyData, you can see here is the structure. 
+
+it's got some dictionary of the shirts. and it's keeping track of the votes per second per county. 
+
+and this is doing a linq query, across all of the ReliableDictionaries for all of the counties, 
+
+and doing a sumation on them to show us the result by shirt, which is what we are seeing in the UX. 
+
+and that's how easy it is. all of these are endurably consistent, highly available. 
+
+and that's a linq query across the whole thing.
+
+go back here. now I've got a cluster view. 
+
+this is where things get interesting. here's the cluster with all the microservices with the custom UX we've built to show you. 
+
+actually it looks like it's might be still deploying. 
+
+here's the throughput of the votes that we're seeing, and this is getting continue to rise, and we will get more and more of these.
+
+now what I've done is set a placement constraint such that microservices can only sit on these nodes. 
+
+I'm only looking at the county nodes, the ones that the county aggregators or sitting. 
+
+what I'm gonna do is lift that placement constraint, 
+
+and I lift that placement constraint by first, connecting to the service fabric endpoint. 
+
+52:05
+and here, this, you can see PlacementConstraints. I'm gonna lift the placement constraints, FA???. 
+
+now we're gonna see this thing like spread out all over the place. 
+
+we shall see this start to going here in a second. 
+
+and you can see the microservices start to migrate.
+
+and in a fullness of time, given us another minute or so, we're gonna see all of these microservices get spread out across the rest of the cluster. 
+
+just all automatically happening through lifting that placement constraint.
+
+and then remember this is stateful data that has been migrated all of these counts for this county that has been migrated is part of these operations.
+
+so that's a quick look at that.
+
+let's switch back to the powerpoint. and we have one last demo to show you.
+
+and this one is a Reliable Actors API. 
+
+how many people have heard of project Orleans? how many people have heard of the actor model? so quite a few of you.
+
+Reliable Actors API lets you build basically object oriented microservices. 
+
+ones where the state lifecycle management is all done by the actor, progamming management interface. 
+
+you just worry about the object and the objects talk to each other through messages, and the activation happens automatically. 
+
+if I reference an actor that doesn't exist, the actor object doesn't exist in an instance, the actor framework automatically instantiates it.
+
+and I don't have to worry about it. if it becomes idle, it gets torn down from RAM, and basically stays persistently on disk. 
+
+if it gets activated again, it happens automatically.
+
+we've written a little game highlight this called Actoroids, where each object in the game, 
+
+this is kind of because project Orleans is being used by Halo online where everything is an actor on halo online, kind of like this, 
+
+a gateway represents an actor, the ship is an actor, the asteroid or each individual actor and the lazer beams or bolts are all individual actors. 
+
+the system all talk to each other through actor message passing. 
+
+let's switch back to the demo machine and take a look at this source code.
+
+I've got Actoroid up here running. here's the Actoroid.
+
+what I'm gonna do is publish this, deploy this. ..right click.. Deploy.. 
+
+and this is gonna deploy this to a windows service fabric cluster that's already operating. 
+
+well, that's launching. 
+
+I'll show you the asteroid actor which here in its activation method, simply register the timer that is gonna call moveAsteroid. 
+
+moveAsteroid simply updates the position of the actor. and that's it. 
+
+let me pull this game up to show you this demo and bring Corey Sanders up. and we're gonna play a little Actoroids.
+
+it's gonna be amazing.
+
+I think this is me and this is you. this is Corey Sanders.
+
+the best part of the entire presentation is now cuz I'm on stage. 
+
+thank you. Corey. they have idea of who I am.
+
+wake up your xbox in tooler. mine got this connected? 
+
+oh. excellent. 
+
+this is you. 
+
+oh that was excellent. is anything happening?
+
+yeah, I don't know what's going on with yours. actually this controller doesn't seem to be working either.
+
+well you're gonna imagine what it would be like in the game. it would be really aw.. 
+
+haha.. 
+
+it's really fun. 
+
+actually it does, the keyboard works. 
+
+oh!! I die. 
+
+the keyboard works. 
+
+ok, my keyboard works? 
+
+no, I'm moving your slides..
+
+can we get you back on the screen? cuz I wanna show you what I was going to do to you. 
+
+that's by updating this game alive. 
+
+it's good to be up here. 
+
+am I done? 
+
+yeah, you can go. 
+
+well thank you everybody, thank you thank you. Corey Sanders.
+
+alright, so what I was gonna do is this.
+
+I've got a code snappy here that I've inserted that is gonna make the asteroid evil for Corey. he didn't know that. 
+
+and then what I was gonna do is I need to update the version of this. 
+
+I need to set the Assembly Information to a new version, so service fabric knows that it's new. 
+
+then I'll come up to the application, and I'll say build. 
+
+and what I'm gonna do is, this is gonna start rolling update, 
+
+so I'm gonna say package; and I'm gonna go to powershell now; and I'm gonna say upload.
+
+this is just gonna upload that updated version. we go back to the game. 
+
+so we go to rolling update, now package is uploaded. 
+
+and then that's started rolling update. what? 
+
+did I start rolling update? there's a rolling update. 
+
+and now what's gonna happen here is these asteroids are gonna start to turn red, 
+
+and Corey was up here playing and sat whipping out like he did.
+
+we would see the asteroids are gonna turn red and follow his ship. so as the rolling update proceeds. 
+
+and this would just take a few seconds. there we go. 
+
+what they're gonna do is they're gonna follow Corey. Corey is backstage playing up. 
+
+you can see there's no pause to the game, these microservice instances, 
+
+these actors are getting upgraded while we're playing the game and changing their logic with 0 down time as I continue to play the game. 
+
+all happening again through the magic. and these are all stateful actors with multiple replicas. 
+
+so you get the idea. that's the game.
+
+one last thing I want to, oh, he's playing backstage. 
+
+so one last thing I wanna show you is a video from osi soft, which has been using service fabric for a while. 
+
+let's hear what they have to say about it. and then I'll give you some pointers, some other sessions and we'll wrap it up. 
+
+btw, osi soft is operational intelligence company. and there you go.
+
+---
+we've always known that resources are not infinite. we look at california, what we're going through right now, we're going through a record drought. we need to manage the resources that we have. what we're seeing now is just a giant explosion in the number of sensors. what we really need is a system that can provide insight over all this data that we're capturing. the only way to do that effectively is to have it live in the public cloud. our new set of PI system services will allow both the consumer and the utilities to gain insights and actually be able to manage these  resources in real time.
+Technology is critical in our business. we are data driven. it's a critical piece for us that we got the right data in the right time to be able to use it effectively. the microsoft cloud platform and service fabric really enables us to capture the data from that proliferation of sensors and do sth meaningful with it. what service fabric brings for us is a level of reliablity and performance that we couldn't get by just using the standard virtual machine technologies. it provided a path for us to build new technologies within Azure and actually be able to bring them back on prem as well, which is important for our customers. for the kinds of class of problem we're trying to solve, service fabric really is the only platform that make sense for us. to build ourselves, it would of been a multi-year actual undertaking of us. we want to concentrate on where we add value and leverage the platform that's already there.
+alright so let's switch back ,and I'll give you some a little bit more to what you're getting today with service fabric and then point you some other video. today language is c++ & C#, we've got other languages comming. operating system today is windows, linux is gonna be comming. containers right now is job objects on windows, you'll see containers on windows and linux. finally integration with azure today an SDK, there's yield of SDK which is live now. future we'll have resource provider that will make cluster management simpler. that basically takes me through the whole stack. of course, you wanna get higher level we saw web apps this morning, and azure service as higher level programming model on top of the azure compute platform that flashes it out from high control to hot productivity. and finally here's some of the sessions that we've got that will go to deeper in the service fabric, in the containers, into resource manager into the new V2 version of these apis. with that, thank you very much. hope you have a great conference and have fun on azure and with service fabric, thanks.
